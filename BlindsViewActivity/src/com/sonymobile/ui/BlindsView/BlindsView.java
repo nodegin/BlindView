@@ -181,11 +181,8 @@ public class BlindsView extends LinearLayout {
 	        if (normalizedVerticalDistanceFromTouch <= 1f) {
 	
 	                // rot(d) = -((d-0.55)*2)^2+1 where 0<=d
-	                final double normalizedRotationX = Math
-	                              . max(0d,
-	                                         (-Math. pow(
-	                                                     ((normalizedVerticalDistanceFromTouch - 0.55f) * 2f),
-	                                                     2) + 1));
+	                final double normalizedRotationX = Math.max(0d,
+	                              (-Math. pow(((normalizedVerticalDistanceFromTouch - 0.55f) * 2f),2) + 1));
 	
 	                // Blind above touch means negative angle
 	                if ((currentBlindPivotY < yPos)) {
@@ -193,7 +190,17 @@ public class BlindsView extends LinearLayout {
 	                } else {
 	                        xRotation = ( float) (CONFIG_MAX_ROTATIONX * normalizedRotationX);
 	                }
+	                
+	                // -1 <= normalizedHorizontalDistanceFromPivot <= 1
+	    	        final float normalizedHorizontalDistanceFromPivot = ((xPos / getWidth()) - 0.5f) / 0.5f;
+	    	        // 0 <= linearDeclineFactor <= 1
+	    	        final float linearDeclineFactor = 1 - normalizedVerticalDistanceFromTouch;
+	    	        yRotation = CONFIG_MAX_ROTATIONY
+	    	                        * normalizedHorizontalDistanceFromPivot
+	    	                        * linearDeclineFactor;
+
 	        }
+	        
 	        currentBlind.setRotations(xRotation, yRotation, 0f);
         }
 }
@@ -282,6 +289,7 @@ public class BlindsView extends LinearLayout {
         canvas.translate((coordX + (width / 2f)), (coordY + (height / 2f)));
  
         // Apply transformations
+        mCamera.rotateY(yRotation);
         mCamera.rotateX(xRotation);
  
         Matrix cameraMatrix = new Matrix();
