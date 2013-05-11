@@ -144,12 +144,12 @@ public class BlindsView extends LinearLayout {
 	        switch (event.getAction()) {
 	        case MotionEvent.ACTION_DOWN:
 	        	mIsInBlindMode = true ;
-	        	calculateBlindRotations(event.getY(), event.getY());
+	        	calculateBlindRotations(event.getY(), event.getX());
 	        	break;
 	        case MotionEvent.ACTION_CANCEL:
 	        	break;
 	        case MotionEvent.ACTION_MOVE:
-	        	calculateBlindRotations(event.getY(), event.getY());
+	        	calculateBlindRotations(event.getY(), event.getX());
 	            break;
 	        case MotionEvent.ACTION_UP:
 	            mIsInBlindMode = false ;
