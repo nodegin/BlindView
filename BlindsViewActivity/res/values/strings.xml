@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BlindsView Tutorial</string> 
+  	<string name="dummy_text_large">BlindsView Tutorial</string> 
+  	<string name="dummy_text_medium">Sony Mobile Developer World</string> 
+  	<string name="dummy_text_small">developer.sonymobile.com</string> 
+  	<string name="dummy_button_one">This button does nothing</string> 
+  	<string name="dummy_button_two">Neither does this one!</string> 
+
+</resources>

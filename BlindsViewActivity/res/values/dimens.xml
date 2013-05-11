@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name= "blindHeight"> 37dp </dimen >
+ 	<dimen name="touchEffectRadius"> 101dp</dimen >
+    
+
+</resources>
