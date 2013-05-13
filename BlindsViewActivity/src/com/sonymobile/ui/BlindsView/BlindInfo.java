@@ -8,8 +8,35 @@ import android.graphics.Rect;
 public class BlindInfo {
         private final Rect mBounds;
         private float mRotationX, mRotationY , mRotationZ;
+        private float mScale = 1f;
+        private boolean affected = false;
+        private float yOffset = 0;
         
-        public BlindInfo(int l, int t, int r, int b) {
+        /**
+		 * @return the offset
+		 */
+		public float getYOffset() {
+			return yOffset;
+		}
+		/**
+		 * @param offset the offset to set
+		 */
+		public void setYOffset(float offset) {
+			this.yOffset = offset;
+		}
+		/**
+		 * @return the affected
+		 */
+		public boolean isAffected() {
+			return affected;
+		}
+		/**
+		 * @param affected the affected to set
+		 */
+		public void setAffected(boolean affected) {
+			this.affected = affected;
+		}
+		public BlindInfo(int l, int t, int r, int b) {
                 mBounds = new Rect(l, t, r, b);
         }
         public void setRotations(float xRotation, float yRotation, float zRotation) {
@@ -18,6 +45,14 @@ public class BlindInfo {
                 mRotationZ = zRotation;
         }
         
+        public void setScale(float s) {
+                mScale = s;
+        }
+         
+        public float getScale() {
+                return mScale ;
+        }
+
         public int getHeight() {
                 return mBounds .height();
         }

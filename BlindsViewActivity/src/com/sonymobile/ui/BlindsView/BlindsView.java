@@ -64,6 +64,16 @@ public class BlindsView extends LinearLayout {
 	/** Light source angular offset*/
 	private static final float LIGHT_SOURCE_ANGLE = 38f;
 
+	private static final float CONFIG_MIN_SCALING = 0.97f;
+	private static final float CONFIG_MAX_YOFFSET = 16;
+	
+	private static final int CONFIG_BLINDSTROKE_BASECOLOR = Color.DKGRAY;
+	private static final int CONFIG_BLINDSTROKE_ALPHA = 175;
+	private static final int CONFIG_BLINDSTROKE_BEVEL_ANGLE = 45;
+	private static float mConfigStrokeWidth;
+
+
+	
 	private Paint mForegroundPaint;
 
 	private final static boolean LOG_ON = true;
@@ -71,7 +81,7 @@ public class BlindsView extends LinearLayout {
 	private Bitmap mUndistortedBitmap ;         
 	private Canvas mUndistortedCanvas;
 	private Drawable mBgDrawable ;
-	private Paint mBlindPaint;
+	private Paint mBlindPaint, mBlindStrokePaint;
 	private static float mMaxAffectRadius;
 	
 	private final Camera mCamera = new Camera();
@@ -110,6 +120,14 @@ public class BlindsView extends LinearLayout {
         
         mMaxAffectRadius = getResources().getDimension(R.dimen.touchEffectRadius );
 	
+        mConfigStrokeWidth = getResources().getDimension(R.dimen.blindStrokeWidth );
+        mBlindStrokePaint = new Paint();
+        mBlindStrokePaint.setColor(CONFIG_BLINDSTROKE_BASECOLOR);
+        mBlindStrokePaint.setAlpha(CONFIG_BLINDSTROKE_ALPHA);
+        mBlindStrokePaint.setStrokeWidth(mConfigStrokeWidth);
+        mBlindStrokePaint.setAntiAlias(true);
+        mBlindStrokePaint.setFilterBitmap(true);
+
 	}
 
 	/**
@@ -168,15 +186,18 @@ public class BlindsView extends LinearLayout {
         float currentBlindPivotY;
         float normalizedVerticalDistanceFromTouch;
 
+        
         for (BlindInfo currentBlind : mBlindSet) {
 	        currentBlindPivotY = currentBlind.getTop()
 	                   + ( float) currentBlind.getHeight() / 2f;
-	        normalizedVerticalDistanceFromTouch = Math
-	                   . abs((yPos - currentBlindPivotY)
-	                               / mMaxAffectRadius);
+	        normalizedVerticalDistanceFromTouch = Math.abs(
+	        		(yPos - currentBlindPivotY)/ mMaxAffectRadius);
 	
 	        float xRotation = 0;
 	        float yRotation = 0;
+	        float scaling = 1f;
+	        float yOffset = 0f;
+	        
 	        // Only rotate if within valid range
 	        if (normalizedVerticalDistanceFromTouch <= 1f) {
 	
@@ -199,9 +220,26 @@ public class BlindsView extends LinearLayout {
 	    	                        * normalizedHorizontalDistanceFromPivot
 	    	                        * linearDeclineFactor;
 
+	    	        // SCALING:
+	    	        // 1 at both end points, CONFIG_MIN_SCALING at center and
+	    	        // declining with the squared distance in between.
+	    	        scaling = 1f
+	    	                - (1f - normalizedVerticalDistanceFromTouch
+	    	                        * normalizedVerticalDistanceFromTouch)
+	    	                * (1f - CONFIG_MIN_SCALING);
+	    	
+	    	     // Y OFFSET:
+					yOffset = ((1f - normalizedVerticalDistanceFromTouch
+							* normalizedVerticalDistanceFromTouch))
+							* CONFIG_MAX_YOFFSET;
+
+	    	        
 	        }
-	        
+	        currentBlind.setScale(scaling);
 	        currentBlind.setRotations(xRotation, yRotation, 0f);
+	        currentBlind.setYOffset(yOffset);
+			
+	        
         }
 }
 
@@ -278,7 +316,9 @@ public class BlindsView extends LinearLayout {
         final float xRotation = info.getRotationX();
         final float yRotation = info.getRotationY();
         final float zRotation = info.getRotationZ();
-
+        final float scale = info.getScale();
+        final float yOffset = info.getYOffset();
+        final boolean drawBottomStroke = xRotation == 0 ? false : true;
  
         mBlindPaint.setColorFilter(calculateLight(xRotation));
  
@@ -291,7 +331,9 @@ public class BlindsView extends LinearLayout {
         // Apply transformations
         mCamera.rotateY(yRotation);
         mCamera.rotateX(xRotation);
- 
+        canvas.scale( scale, scale , 0f, 0f);
+        canvas.translate(0f, yOffset);
+
         Matrix cameraMatrix = new Matrix();
         mCamera.getMatrix(cameraMatrix);
         canvas.concat(cameraMatrix);
@@ -302,7 +344,15 @@ public class BlindsView extends LinearLayout {
        final RectF dst = new RectF(-(width / 2f), -(height / 2f), width / 2f,
                height / 2f);
        canvas.drawBitmap( mUndistortedBitmap, src, dst, mBlindPaint );
- 
+       
+       if (drawBottomStroke) {
+           mBlindStrokePaint.setColorFilter(calculateLight(xRotation
+                   + CONFIG_BLINDSTROKE_BEVEL_ANGLE ));
+           canvas.drawLine(dst. left, (dst.bottom - mConfigStrokeWidth / 2f),
+                   dst. right, (dst.bottom - mConfigStrokeWidth / 2f),
+                   mBlindStrokePaint);
+   }
+
        // Restore Canvas and Camera
        mCamera.restore();
        canvas.restore();

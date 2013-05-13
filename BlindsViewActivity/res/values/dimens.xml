@@ -2,6 +2,6 @@
 <resources>
     <dimen name= "blindHeight"> 37dp </dimen >
  	<dimen name="touchEffectRadius"> 101dp</dimen >
-    
+    <dimen name="blindStrokeWidth"> 1.5dp</dimen >
 
 </resources>
